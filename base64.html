@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert File to Base64</title>
+</head>
+<body>
+    <h2>Upload File and Convert to Base64</h2>
+    <input type="file" id="fileInput" />
+    <button onclick="convertToBase64()">Convert to Base64</button>
+
+    <h3>Base64 Result</h3>
+    <textarea id="base64Output" rows="10" cols="50" readonly></textarea>
+
+    <script>
+        function convertToBase64() {
+            const fileInput = document.getElementById('fileInput');
+            const base64Output = document.getElementById('base64Output');
+            const file = fileInput.files[0];
+
+            if (file) {
+                const reader = new FileReader();
+                
+                // This event is triggered when the file has been read
+                reader.onload = function(event) {
+                    base64Output.value = event.target.result.split(',')[1]; // Get only the Base64 part
+                };
+                
+                // Read the file as a data URL (Base64)
+                reader.readAsDataURL(file);
+            } else {
+                base64Output.value = 'Please select a file first.';
+            }
+        }
+    </script>
+</body>
+</html>

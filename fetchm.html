@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch All Images from URL</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input[type="url"] {
+            padding: 5px;
+            width: 300px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        .image-container {
+            margin-top: 20px;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px;
+            display: block;
+        }
+        .download-link {
+            display: block;
+            margin: 10px 0;
+            text-decoration: none;
+            color: #0066cc;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Fetch All Images from URL</h1>
+
+    <div>
+        <label for="pageUrl">Enter Page URL:</label>
+        <input type="url" id="pageUrl" placeholder="Enter URL here" />
+    </div>
+
+    <div>
+        <button onclick="fetchAllImages()">Fetch Images</button>
+    </div>
+
+    <div class="image-container" id="imageContainer">
+        <!-- Images will be displayed here -->
+    </div>
+
+    <script>
+        function fetchAllImages() {
+            const url = document.getElementById("pageUrl").value;
+            const container = document.getElementById("imageContainer");
+
+            if (!url) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            // Clear previous results
+            container.innerHTML = '';
+
+            // Use a public CORS proxy to bypass CORS restrictions
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const fetchUrl = proxyUrl + url;
+
+            // Create a request to fetch the HTML content of the page
+            fetch(fetchUrl)
+                .then(response => response.text())
+                .then(data => {
+                    // Create a new DOM from the fetched HTML data
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, "text/html");
+
+                    // Select all images on the page
+                    const images = doc.querySelectorAll('img');
+
+                    if (images.length === 0) {
+                        alert("No images found on the page.");
+                        return;
+                    }
+
+                    // Loop through the images and display them
+                    images.forEach((img, index) => {
+                        const imgElement = document.createElement("img");
+                        imgElement.src = img.src;
+                        imgElement.alt = `Image ${index + 1}`;
+                        container.appendChild(imgElement);
+
+                        // Create a download link for each image
+                        const downloadLink = document.createElement("a");
+                        downloadLink.href = img.src;
+                        downloadLink.download = `image_${index + 1}`;
+                        downloadLink.textContent = `Download Image ${index + 1}`;
+                        downloadLink.className = "download-link";
+                        container.appendChild(downloadLink);
+
+                        container.appendChild(document.createElement("br"));
+                    });
+                })
+                .catch(err => {
+                    alert("Error fetching the page: " + err.message);
+                });
+        }
+    </script>
+
+</body>
+</html>

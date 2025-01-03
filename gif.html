@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create GIF</title>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js.optimized@0.2.0/gif.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+        }
+        #outputGif {
+            max-width: 100%;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GIF Maker - Create Your Own GIF!</h1>
+
+    <div>
+        <label for="imageUpload">Upload Images (JPG, PNG, etc.):</label>
+        <input type="file" id="imageUpload" accept="image/*" multiple />
+    </div>
+
+    <div>
+        <label for="delay">Frame Delay (ms):</label>
+        <input type="number" id="delay" value="500" min="10" />
+    </div>
+
+    <div>
+        <button onclick="generateGif()">Create GIF</button>
+    </div>
+
+    <h2>Resulting GIF:</h2>
+    <img id="outputGif" style="display:none;" />
+    <a id="downloadLink" style="display:none;" download="created-gif.gif">Download GIF</a>
+
+    <script>
+        // Initialize the GIF object
+        let gif = new GIF({
+            workers: 2,
+            quality: 10,
+            delay: parseInt(document.getElementById("delay").value),
+        });
+
+        // Function to handle the creation of the GIF
+        function generateGif() {
+            // Reset previous result
+            document.getElementById("outputGif").style.display = "none";
+            document.getElementById("downloadLink").style.display = "none";
+
+            // Get selected images from input
+            let files = document.getElementById("imageUpload").files;
+            if (files.length < 1) {
+                alert("Please upload at least one image.");
+                return;
+            }
+
+            // Get the frame delay from user input
+            let delay = parseInt(document.getElementById("delay").value);
+
+            // Create an array of promises for loading images
+            let loadPromises = [];
+            for (let i = 0; i < files.length; i++) {
+                loadPromises.push(loadImage(files[i]));
+            }
+
+            // Wait for all images to load, then create GIF
+            Promise.all(loadPromises).then(images => {
+                // Add each image to the GIF with the specified delay
+                images.forEach(image => {
+                    gif.addFrame(image, { delay: delay, copy: true });
+                });
+
+                // Render the GIF
+                gif.render();
+
+                // When rendering finishes, display the GIF
+                gif.on('finished', function(blob) {
+                    const gifUrl = URL.createObjectURL(blob);
+                    const outputGif = document.getElementById("outputGif");
+                    const downloadLink = document.getElementById("downloadLink");
+
+                    outputGif.src = gifUrl;
+                    outputGif.style.display = "block";
+
+                    downloadLink.href = gifUrl;
+                    downloadLink.style.display = "inline-block";
+                });
+            });
+        }
+
+        // Function to load images and return a promise
+        function loadImage(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    img.src = e.target.result;
+                    img.onload = () => resolve(img);
+                    img.onerror = reject;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    </script>
+
+</body>
+</html>

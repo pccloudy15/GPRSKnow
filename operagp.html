@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3GP Video Converter</title>
+    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.10.0/ffmpeg.min.js"></script>
+</head>
+<body>
+    <h2>Convert Video to 3GP (128x96)</h2>
+    
+    <input type="file" id="fileInput" accept="video/*" />
+    <button id="convertBtn">Convert to 3GP</button>
+
+    <p id="status" style="display:none;"></p>
+    <a id="downloadLink" style="display:none" href="#">Download Converted 3GP File</a>
+
+    <script>
+        // Prevent form submission on button click to avoid page reload
+        document.getElementById('convertBtn').addEventListener('click', function(event) {
+            event.preventDefault();  // Prevent default button behavior
+
+            convertTo3GP();  // Proceed with conversion
+        });
+
+        async function convertTo3GP() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            // Ensure file is selected
+            if (!file) {
+                return;  // Do nothing if no file is selected
+            }
+
+            // Hide the convert button to avoid multiple clicks
+            document.getElementById('convertBtn').style.display = 'none';
+
+            // Show a status message
+            document.getElementById('status').style.display = 'block';
+            document.getElementById('status').innerText = "Converting... Please wait.";
+
+            // Initialize ffmpeg.wasm
+            const { createFFmpeg, fetchFile } = FFmpeg;
+            const ffmpeg = createFFmpeg({ log: true });
+            await ffmpeg.load();
+
+            // Load the video file into ffmpeg.wasm
+            ffmpeg.FS('writeFile', file.name, await fetchFile(file));
+
+            // Run the conversion command to 3GP format with the resolution 128x96
+            await ffmpeg.run('-i', file.name, '-s', '128x96', '-c:v', 'libx264', '-f', '3gp', 'output.3gp');
+
+            // Fetch the converted file
+            const data = ffmpeg.FS('readFile', 'output.3gp');
+
+            // Create a download link for the converted file
+            const convertedFile = new Blob([data.buffer], { type: 'video/3gp' });
+            const url = URL.createObjectURL(convertedFile);
+
+            // Show the status and display the download link
+            document.getElementById('status').innerText = "Conversion done!";
+            const downloadLink = document.getElementById('downloadLink');
+            downloadLink.href = url;
+            downloadLink.download = 'converted_video.3gp';
+            downloadLink.style.display = 'inline-block'; // Show the download button
+        }
+    </script>
+</body>
+</html>

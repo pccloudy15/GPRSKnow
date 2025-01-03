@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Fetcher & Downloader</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        input[type="url"] {
+            padding: 5px;
+            width: 300px;
+        }
+        button {
+            padding: 8px 16px;
+            cursor: pointer;
+        }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Image Fetcher & Downloader</h1>
+
+    <div>
+        <label for="imageUrl">Enter Image URL:</label>
+        <input type="url" id="imageUrl" placeholder="Enter image URL here" />
+    </div>
+
+    <div>
+        <button onclick="fetchImage()">Fetch Image</button>
+    </div>
+
+    <div>
+        <h2>Fetched Image:</h2>
+        <img id="fetchedImage" />
+    </div>
+
+    <div>
+        <a id="downloadLink" style="display: none;" download="downloaded_image.jpg">
+            <button>Download Image</button>
+        </a>
+    </div>
+
+    <script>
+        function fetchImage() {
+            const imageUrl = document.getElementById("imageUrl").value;
+            const imageElement = document.getElementById("fetchedImage");
+            const downloadLink = document.getElementById("downloadLink");
+
+            if (!imageUrl) {
+                alert("Please enter a valid image URL.");
+                return;
+            }
+
+            // Load the image
+            imageElement.style.display = "none";  // Hide the image initially
+            imageElement.onload = function() {
+                imageElement.style.display = "block";  // Show the image when it's loaded
+            };
+            imageElement.onerror = function() {
+                alert("Failed to load image. Please check the URL.");
+                imageElement.style.display = "none";  // Hide image on error
+            };
+
+            // Set image source to the URL
+            imageElement.src = imageUrl;
+
+            // Update download link
+            downloadLink.href = imageUrl;
+            downloadLink.style.display = "inline-block"; // Show download button
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Convert Base64 to File</title>
+</head>
+<body>
+    <h2>Convert Base64 to File</h2>
+    
+    <label for="base64Input">Paste Base64 String:</label><br>
+    <textarea id="base64Input" rows="10" cols="50"></textarea><br>
+
+    <label for="fileName">Enter File Name (with extension):</label><br>
+    <input type="text" id="fileName" placeholder="example.txt"><br><br>
+
+    <button onclick="convertBase64ToFile()">Convert to File</button>
+
+    <h3>Download Your File</h3>
+    <a id="downloadLink" style="display:none;">Download File</a>
+
+    <script>
+        function convertBase64ToFile() {
+            const base64Input = document.getElementById('base64Input').value;
+            const fileName = document.getElementById('fileName').value.trim();
+            const downloadLink = document.getElementById('downloadLink');
+
+            // Validate the Base64 string
+            if (!base64Input) {
+                alert('Please paste a valid Base64 string.');
+                return;
+            }
+
+            // Remove any "data:" prefix if it exists
+            const base64Data = base64Input.split(',')[1] || base64Input;
+
+            // Decode the Base64 string
+            const byteCharacters = atob(base64Data);
+
+            // Convert the decoded string into a byte array
+            const byteArray = new Uint8Array(byteCharacters.length);
+            for (let i = 0; i < byteCharacters.length; i++) {
+                byteArray[i] = byteCharacters.charCodeAt(i);
+            }
+
+            // Create a Blob from the byte array
+            const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+
+            // Create a download link
+            const fileURL = URL.createObjectURL(blob);
+            downloadLink.href = fileURL;
+            downloadLink.download = fileName || 'downloaded_file';  // Default name if no input
+
+            // Show the download link
+            downloadLink.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

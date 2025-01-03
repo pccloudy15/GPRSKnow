@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unzip a ZIP File</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+    <h2>Unzip Your ZIP File</h2>
+    
+    <!-- File input for choosing the zip file -->
+    <input type="file" id="zipFile" accept=".zip" />
+    <br><br>
+
+    <!-- Button to trigger unzipping -->
+    <button id="unzipButton">Unzip File</button>
+    <br><br>
+
+    <!-- Div to show download links for unzipped files -->
+    <div id="downloadLinks"></div>
+
+    <script>
+        document.getElementById('unzipButton').addEventListener('click', function () {
+            const fileInput = document.getElementById('zipFile');
+            const downloadLinksDiv = document.getElementById('downloadLinks');
+            
+            // Clear previous links or messages
+            downloadLinksDiv.innerHTML = '';
+            
+            // Check if a file has been selected
+            if (fileInput.files.length === 0) {
+                downloadLinksDiv.innerHTML = 'Please select a ZIP file.';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const zipData = e.target.result;
+
+                // Process the zip file with JSZip
+                JSZip.loadAsync(zipData).then(function(zip) {
+                    // Loop over the contents of the ZIP file
+                    zip.forEach(function (relativePath, zipEntry) {
+                        zipEntry.async('blob').then(function (fileData) {
+                            const link = document.createElement('a');
+                            link.href = URL.createObjectURL(fileData);
+                            link.download = zipEntry.name;
+                            link.textContent = 'Download ' + zipEntry.name;
+                            downloadLinksDiv.appendChild(link);
+                            downloadLinksDiv.appendChild(document.createElement('br'));
+                        });
+                    });
+                }).catch(function(error) {
+                    downloadLinksDiv.innerHTML = 'Error: ' + error.message;
+                });
+            };
+
+            reader.readAsArrayBuffer(file); // Read the file as binary data
+        });
+    </script>
+</body>
+</html>

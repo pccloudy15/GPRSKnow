@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video to 3GP Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
+        h1 {
+            color: #333;
+        }
+        input[type="file"] {
+            margin: 10px 0;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Video to 3GP Converter</h1>
+    <p>Select a video file, and we'll convert it to 3GP (128x96 resolution) for you.</p>
+
+    <input type="file" id="videoInput" accept="video/*">
+    <br>
+    <button onclick="uploadVideo()">Convert to 3GP</button>
+
+    <div id="output"></div>
+
+    <script>
+        function uploadVideo() {
+            const videoInput = document.getElementById("videoInput");
+            const output = document.getElementById("output");
+
+            if (!videoInput.files.length) {
+                output.textContent = "Please select a video file first.";
+                return;
+            }
+
+            const file = videoInput.files[0];
+
+            // Check if the file is a video
+            if (!file.type.startsWith('video/')) {
+                output.textContent = "Please select a valid video file.";
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("video", file);
+
+            // Send the video to the server for conversion
+            fetch('/convert-to-3gp', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const downloadUrl = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = "converted-video.3gp";
+                link.textContent = "Click here to download your 3GP video";
+                output.innerHTML = "";
+                output.appendChild(link);
+            })
+            .catch(error => {
+                output.textContent = "Error: " + error.message;
+            });
+        }
+    </script>
+
+</body>
+</html>
